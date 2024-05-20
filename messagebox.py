@@ -1,0 +1,173 @@
+import ttkbootstrap as ttk
+
+# 使用全局变量记录当前弹窗，避免重复创建
+ACTIVE_MESSAGEBOX = None
+
+
+class Messagebox(ttk.Toplevel):
+    """
+    弹窗
+    """
+    def __call__(self, *args, **kwargs):
+        if hasattr(self, "return_value"):
+            return self.return_value
+        else:
+            return False
+    def __init__(self,
+                 master,
+                 title="Messagebox",
+                 text="",
+                 mode = "read", # 模式，read表示只读，write表示可写
+                 text_color="red",
+                 text_font=("", 14,"bold"),
+                 button_font=("", 14),
+                 button_text_color="white",
+                 button_text="确定",
+                 button_text2 = None,
+                 button_command=None,
+                 button_style="info-outline",
+                 text_line_max_length = 20,
+                 progressbar = False,
+                 progressbar_text = ""):
+
+        global ACTIVE_MESSAGEBOX
+
+        if ACTIVE_MESSAGEBOX:
+            ACTIVE_MESSAGEBOX.grab_release()
+            ACTIVE_MESSAGEBOX.destroy()
+        ACTIVE_MESSAGEBOX = self
+        super().__init__(master)
+        self.master = master
+        self.mode = mode
+        self.text = text
+        self.text_color = text_color
+        self.text_font = text_font
+        self.button_font = button_font
+        self.button_text_color = button_text_color
+        self.button_text = button_text
+        self.button_text2 = button_text2
+        self.button_command = button_command
+        self.button_style = button_style
+        self.text_line_max_length = text_line_max_length
+        self.progressbar = progressbar
+        self.progressbar_text = progressbar_text
+
+        if self.button_command is None:
+            self.button_command = self.click_button
+        self.title(title)
+        # 设置弹窗大小，弹出位置为屏幕中心
+        self.geometry(f"+{int(self.winfo_screenwidth() / 2 - 200)}+{int(self.winfo_screenheight() / 2 - 100)}")
+        self.resizable(False, False)
+
+        self.grid_columnconfigure([0,1], weight=1,minsize=200)
+        self.grid_rowconfigure([0,1], weight=1,minsize=100)
+        if not self.progressbar:
+            self.create_label_or_entry()
+            self.create_button()
+            self.bind("<Return>", lambda event: self.click_button(event, return_value=True))
+        else:
+            fg = ttk.Progressbar(self,
+                            maximum=100,
+                            length=500,
+                            bootstyle="success",)
+            fg.grid(row=0,column=0,columnspan=2,padx=20,pady=20,sticky="nsew")
+            la = ttk.Label(self,text="",bootstyle="success",justify="center",anchor="center",font=("", 14,"bold"))
+            la.grid(row=1,column=0,columnspan=2,padx=20,pady=20,sticky="nsew")
+            self.update_progress(fg,la,0)
+        self.protocol("WM_DELETE_WINDOW", self.click_button)
+        self.focus_set()
+        self.master.wait_window(self)
+    def update_progress(self,fg,la,value):
+        self.value = value
+        self.focus_set()
+        if value <= 100:
+            fg.configure(value=value)
+            la.configure(text=f"模拟{self.progressbar_text}中 {value}%")
+            if value == 100:
+                self.click_button()
+                return
+            self.after(25, lambda: self.update_progress(fg,la, value + 1))
+    def create_label_or_entry(self):
+        text = self.insert_newlines(self.text, self.text_line_max_length)
+        if self.mode == "read":
+            ttk.Style().configure("Messagebox.TLabel", font=self.text_font, foreground=self.text_color)
+            lab = ttk.Label(self,
+                            text=text,
+                            style="Messagebox.TLabel").grid(rowspan=1,
+                                                            columnspan=2,
+                                                            padx=20,
+                                                            pady=20,
+                                                            sticky="nsew")
+        elif self.mode == "write":
+            self.text_var = ttk.StringVar()
+            self.text_var.set(text)
+            ttk.Style().configure("Messagebox.TEntry", foreground=self.text_color)
+            entry = ttk.Entry(self,
+                            textvariable=self.text_var,
+                            font=self.text_font,
+                            style="Messagebox.TEntry").grid(rowspan=1,
+                                                           columnspan=2,
+                                                           padx=20,
+                                                           pady=20,
+                                                           sticky="nsew")
+    def create_button(self):
+        ttk.Button(self,
+                   text=self.button_text,
+                   command=lambda: [self.button_command(), self.click_button(return_value=True)],
+                   bootstyle=self.button_style, ).grid(row=1,
+                                                  column=1,
+                                                  sticky="se",
+                                                  ipadx=10,
+                                                  ipady=10,
+                                                  padx=20,
+                                                  pady=20)
+        if not self.button_text2 is None:
+            ttk.Button(self,
+                       text=self.button_text2,
+                       command=lambda: [self.click_button(return_value=False)],
+                       bootstyle=self.button_style, ).grid(row=1,
+                                                      column=0,
+                                                      sticky="sw",
+                                                      ipadx=10,
+                                                      ipady=10,
+                                                      padx=20,
+                                                      pady=20)
+    def click_button(self, event=None,return_value = None):
+        if self.progressbar:
+            if self.value != 100:
+                return False
+        self.return_value = return_value
+        self.grab_release()
+        self.destroy()
+        self.master.unbind("Return")
+        global ACTIVE_MESSAGEBOX
+        ACTIVE_MESSAGEBOX = None
+        if self.return_value == True:
+            if self.mode == "write":
+                self.return_value = self.text_var.get() if self.text_var.get() else "0"
+
+
+    def insert_newlines(self,text, max_length):
+        # 初始化结果字符串
+        result = ""
+        # 遍历原始文本
+        if len(text) <= max_length:
+            return text
+        for i in range(len(text)):
+            # 如果当前字符是空格或者我们达到了最大长度（除了最后一个字符），则插入换行符
+            if (i > 0 and text[i - 1] == ' ') or ( i % max_length == 0):
+                result += "\n"
+                # 添加当前字符到结果字符串
+            result += text[i]
+            # 移除开头可能多余的换行符（如果文本从空格开始）
+        if result.startswith("\n"):
+            result = result[1:]
+        return result
+
+
+
+if __name__ == '__main__':
+    root = ttk.Window(title="弹窗", themename="superhero")
+    ttk.Label(root, text="弹窗").pack()
+    root.geometry("")
+    Messagebox(root, progressbar=True)
