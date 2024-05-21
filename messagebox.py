@@ -8,6 +8,12 @@ class Messagebox(ttk.Toplevel):
     """
     弹窗
     """
+    def __new__(cls, *args, **kwargs):
+        if hasattr(cls, "instance"):
+            return cls.instance
+        else:
+            cls.instance = super().__new__(cls)
+            return cls.instance
     def __call__(self, *args, **kwargs):
         if hasattr(self, "return_value"):
             return self.return_value
@@ -29,13 +35,6 @@ class Messagebox(ttk.Toplevel):
                  text_line_max_length = 20,
                  progressbar = False,
                  progressbar_text = ""):
-
-        global ACTIVE_MESSAGEBOX
-
-        if ACTIVE_MESSAGEBOX:
-            ACTIVE_MESSAGEBOX.grab_release()
-            ACTIVE_MESSAGEBOX.destroy()
-        ACTIVE_MESSAGEBOX = self
         super().__init__(master)
         self.master = master
         self.mode = mode
@@ -74,7 +73,7 @@ class Messagebox(ttk.Toplevel):
             la = ttk.Label(self,text="",bootstyle="success",justify="center",anchor="center",font=("", 14,"bold"))
             la.grid(row=1,column=0,columnspan=2,padx=20,pady=20,sticky="nsew")
             self.update_progress(fg,la,0)
-        self.protocol("WM_DELETE_WINDOW", self.click_button)
+        self.protocol("WM_DELETE_WINDOW", lambda: self.click_button(return_value=False))
         self.focus_set()
         self.master.wait_window(self)
     def update_progress(self,fg,la,value):
@@ -84,7 +83,7 @@ class Messagebox(ttk.Toplevel):
             fg.configure(value=value)
             la.configure(text=f"模拟{self.progressbar_text}中 {value}%")
             if value == 100:
-                self.click_button()
+                self.click_button(return_value=True)
                 return
             self.after(25, lambda: self.update_progress(fg,la, value + 1))
     def create_label_or_entry(self):
@@ -140,8 +139,6 @@ class Messagebox(ttk.Toplevel):
         self.grab_release()
         self.destroy()
         self.master.unbind("Return")
-        global ACTIVE_MESSAGEBOX
-        ACTIVE_MESSAGEBOX = None
         if self.return_value == True:
             if self.mode == "write":
                 self.return_value = self.text_var.get() if self.text_var.get() else "0"
@@ -170,4 +167,7 @@ if __name__ == '__main__':
     root = ttk.Window(title="弹窗", themename="superhero")
     ttk.Label(root, text="弹窗").pack()
     root.geometry("")
+    Messagebox(root, progressbar=True)
+    Messagebox(root, )
+    Messagebox(root, )
     Messagebox(root, progressbar=True)

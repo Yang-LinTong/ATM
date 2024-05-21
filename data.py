@@ -31,7 +31,7 @@ def write_data(file_name, info):
         _data.loc[info.index] = info
     with open(file_name, 'w', encoding='utf-8') as f:
         _data.to_csv(f, index=False)
-        return True
+    return True
 
 
 if __name__ == '__main__':

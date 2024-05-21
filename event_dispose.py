@@ -29,15 +29,20 @@ def withdraw_or_deposit(self, amount, mode="deposit"):
                     if not choose():
                         return
                     self.user["balance"].values[0] = self.user["balance"].values[0] + get_input
-                    if not self.message(title=title,
-                                        progressbar=True,
-                                        progressbar_text=title)():
-                        return
+                    self.message(title=title,
+                                 progressbar=True,
+                                 progressbar_text=title)
                     if write_data(data_path, self.user):
                         self.message(title=title,
                                      text=f"{text}{get_input}元成功",
                                      button_text="确定",
                                      )
+                    else:
+                        self.message(title=title,
+                                     text=f"{text}失败",
+                                     button_text="确定",
+                                     )
+                        self.user["balance"].values[0] = self.user["balance"].values[0] - get_input
                 else:
                     if self.user["balance"].values[0] >= get_input:
                         choose = self.message(title=title,
@@ -47,15 +52,20 @@ def withdraw_or_deposit(self, amount, mode="deposit"):
                         if not choose():
                             return
                         self.user["balance"].values[0] = self.user["balance"].values[0] - get_input
-                        if not self.message(title=title,
-                                            progressbar=True,
-                                            progressbar_text=title)():
-                            return
+                        self.message(title=title,
+                                     progressbar=True,
+                                     progressbar_text=title)
                         if write_data(data_path, self.user):
                             self.message(title=title,
                                          text=f"{text}{get_input}元成功",
                                          button_text="确定",
                                          )
+                        else:
+                            self.message(title=title,
+                                         text=f"{text}失败",
+                                         button_text="确定",
+                                         )
+                            self.user["balance"].values[0] = self.user["balance"].values[0] + get_input
                     else:
                         self.message(title=title,
                                      text="余额不足",
@@ -66,11 +76,6 @@ def withdraw_or_deposit(self, amount, mode="deposit"):
                              text=f"{text}金额必须为正整数",
                              button_text="确定",
                              )
-        else:
-            self.message(title=title,
-                         text="请输入金额",
-                         button_text="确定",
-                         )
     else:
         choose = self.message(title=title,
                               text=f"确认是否{text}{amount}元",
@@ -112,6 +117,9 @@ def withdraw_or_deposit(self, amount, mode="deposit"):
 def transfer(self, other_account, amount, password):
     users_info = read_data(data_path)
     other_user = users_info[users_info["account"] == other_account]
+    if other_user.empty:
+        self.message(text="对方账户不存在")
+        return
     if other_account == self.user["account"].values[0]:
         self.message(text="不能给自己转账")
         return
@@ -121,20 +129,22 @@ def transfer(self, other_account, amount, password):
     if choose():
         if self.user["password"].values[0] == password:
             if re.match(r"^\d+$", amount):
-                if other_user.empty:
-                    self.message(text="对方账户不存在")
-                    return
                 if self.user["balance"].values[0] >= int(amount):
                     self.user["balance"].values[0] = self.user["balance"].values[0] - int(amount)
                     other_user["balance"].values[0] = other_user["balance"].values[0] + int(amount)
-                    if not self.message(title="转账",
-                                        progressbar=True,
-                                        progressbar_text="转账")():
-                        write_data(data_path, (self.user, other_user))
-                        self.message(title="转账",
-                                     text="转账成功",
-                                     button_text="确定",
-                                     )
+                    if self.message(title="转账",
+                                    progressbar=True,
+                                    progressbar_text="转账")():
+                        if write_data(data_path, (self.user, other_user)):
+                            self.message(title="转账",
+                                         text="转账成功",
+                                         button_text="确定",
+                                         )
+                        else:
+                            self.message(title="转账",
+                                         text="转账失败",
+                                         button_text="确定",
+                                         )
                 else:
                     self.message(text="余额不足")
                     return

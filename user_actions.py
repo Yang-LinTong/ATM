@@ -329,7 +329,7 @@ class UserActions:
                              bootstyle=widget["bootstyle"],
                              text=widget["text"],)
             btn.grid(row=widget["row"], column=widget["column"], padx=10, pady=10, ipadx=10, ipady=10)
-            btn.bind("<Button-1>", lambda b=btn,w=widget,s=self: w["command"](btn=b,self=s))
+            btn.bind("<Button-1>", lambda event,b=btn,w=widget,s=self: w["command"](btn=b,self=s))
 
         self.button_return(row=3,column=3)
 
