@@ -1,8 +1,5 @@
 import ttkbootstrap as ttk
 
-# 使用全局变量记录当前弹窗，避免重复创建
-ACTIVE_MESSAGEBOX = None
-
 
 class Messagebox(ttk.Toplevel):
     """
