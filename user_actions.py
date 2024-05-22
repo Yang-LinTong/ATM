@@ -384,3 +384,7 @@ class UserActions:
                           )
         btn.grid(row=row, column=column, padx=30, pady=30, ipadx=10, ipady=10,sticky=sticky)
         return btn
+
+if __name__ == '__main__':
+    import messagebox
+    messagebox.test()

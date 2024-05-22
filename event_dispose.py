@@ -192,3 +192,9 @@ def click_revise(self=None, *args, **kwargs):
             self.message(title="错误", text="密码不一致", )
     else:
         self.message(title="错误", text="密码只能为纯数字", )
+
+
+if __name__ == '__main__':
+    import messagebox
+    messagebox.test()
+

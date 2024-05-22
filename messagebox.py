@@ -158,13 +158,15 @@ class Messagebox(ttk.Toplevel):
             result = result[1:]
         return result
 
+def test():
+    root = ttk.Window(title="弹窗演示", themename="superhero")
+    # 隐藏root窗口
+    root.withdraw()
+    Messagebox(root, text = "请运行main.py")
 
 
 if __name__ == '__main__':
-    root = ttk.Window(title="弹窗", themename="superhero")
-    ttk.Label(root, text="弹窗").pack()
-    root.geometry("")
-    Messagebox(root, progressbar=True)
-    Messagebox(root, )
-    Messagebox(root, )
+    root = ttk.Window(title="弹窗演示", themename="superhero")
+    root.withdraw()
+    Messagebox(root, text="弹窗演示")
     Messagebox(root, progressbar=True)

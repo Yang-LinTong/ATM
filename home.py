@@ -1,6 +1,10 @@
 import ttkbootstrap as ttk
 import time
-from user_actions import UserActions,mouse_enter,mouse_leave
+try:
+    from user_actions import UserActions,mouse_enter,mouse_leave
+except:
+    from messagebox import test
+    test()
 
 class Home(ttk.Frame):
     """
