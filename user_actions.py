@@ -371,7 +371,6 @@ class UserActions:
         """
         self.window_destroy()
         self.home_win.create_framewidgets()
-
     def button_return(self,row = 3,column = 4,sticky="es"):
         """
         返回按钮

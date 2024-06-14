@@ -30,10 +30,10 @@ class Login(ttk.Frame):
         self.create_widgets()
         self.master.bind("<Return>", self.click_login_button)
 
-    def button_style(self, *args, **kwargs):
+    def button_style(self, *args, **kwargs) -> None:
         ttk.Style().configure("TButton", font=self.font)
 
-    def create_widgets(self):
+    def create_widgets(self) -> None:
         # 创建提示label
         self.tip_text.set("请输入账号密码")
         tip_label = ttk.Label(self, textvariable=self.tip_text, font=self.tip_font, foreground="red")
@@ -55,9 +55,9 @@ class Login(ttk.Frame):
         login_button.bind("<Button-1>", self.click_login_button)
         login_button.grid(row=3, column=2, pady=25)
 
-    def click_login_button(self, event=None):
+    def click_login_button(self, event=None) -> None:
         """
-
+        登录按钮事件
         :param event:
         :return:
         """
@@ -68,7 +68,7 @@ class Login(ttk.Frame):
             self.master.unbind("Return")
             Home(self.master,self.user)
 
-    def message(self,master = None, title="提示",text="",button_text="确定",*args, **kwargs):
+    def message(self,master = None, title="提示",text="",button_text="确定",*args, **kwargs) ->None:
         if master is None:
             master = self.master
         self.master.unbind("Return")
@@ -80,8 +80,11 @@ class Login(ttk.Frame):
         self.master.bind("<Return>", self.click_login_button)
 
 
-    # 登录验证
-    def login_verification(self):
+    def login_verification(self) -> bool:
+        """
+        登录验证
+        :return: True or False
+        """
 
         account = self.account_var.get()
         password = self.password_var.get()
@@ -90,7 +93,7 @@ class Login(ttk.Frame):
             self.message(text="未输入账号或密码")
             return False
 
-        self.users_info = read_data(data_path) # 使用pandas读取数据
+        self.users_info = read_data(data_path,master=self) # 使用pandas读取数据
         if self.users_info is None:
             return False
         else:

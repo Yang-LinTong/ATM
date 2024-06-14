@@ -5,13 +5,13 @@ class Messagebox(ttk.Toplevel):
     """
     弹窗
     """
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs):   # 单例模式
         if hasattr(cls, "instance"):
             return cls.instance
         else:
             cls.instance = super().__new__(cls)
             return cls.instance
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> None: # ()调用返回点击值
         if hasattr(self, "return_value"):
             return self.return_value
         else:
@@ -73,7 +73,7 @@ class Messagebox(ttk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", lambda: self.click_button(return_value=False))
         self.focus_set()
         self.master.wait_window(self)
-    def update_progress(self,fg,la,value):
+    def update_progress(self,fg,la,value:int) -> None:
         self.value = value
         self.focus_set()
         if value <= 100:
@@ -83,7 +83,7 @@ class Messagebox(ttk.Toplevel):
                 self.click_button(return_value=True)
                 return
             self.after(25, lambda: self.update_progress(fg,la, value + 1))
-    def create_label_or_entry(self):
+    def create_label_or_entry(self) -> None:
         text = self.insert_newlines(self.text, self.text_line_max_length)
         if self.mode == "read":
             ttk.Style().configure("Messagebox.TLabel", font=self.text_font, foreground=self.text_color)
@@ -106,7 +106,7 @@ class Messagebox(ttk.Toplevel):
                                                            padx=20,
                                                            pady=20,
                                                            sticky="nsew")
-    def create_button(self):
+    def create_button(self) -> None:
         ttk.Button(self,
                    text=self.button_text,
                    command=lambda: [self.button_command(), self.click_button(return_value=True)],
@@ -128,7 +128,7 @@ class Messagebox(ttk.Toplevel):
                                                       ipady=10,
                                                       padx=20,
                                                       pady=20)
-    def click_button(self, event=None,return_value = None):
+    def click_button(self, event=None,return_value = None) ->bool|str:
         if self.progressbar:
             if self.value != 100:
                 return False
@@ -141,7 +141,7 @@ class Messagebox(ttk.Toplevel):
                 self.return_value = self.text_var.get() if self.text_var.get() else "0"
 
 
-    def insert_newlines(self,text, max_length):
+    def insert_newlines(self,text:str, max_length:int) -> str:
         # 初始化结果字符串
         result = ""
         # 遍历原始文本
@@ -158,15 +158,18 @@ class Messagebox(ttk.Toplevel):
             result = result[1:]
         return result
 
-def test():
-    root = ttk.Window(title="弹窗演示", themename="superhero")
+def test(title="弹窗演示", text = "请运行main.py"):
+    test = ttk.Window(title=title, themename="superhero")
     # 隐藏root窗口
-    root.withdraw()
-    Messagebox(root, text = "请运行main.py")
+    test.withdraw()
+    Messagebox(test, text = text)
+    test.mainloop()
 
 
 if __name__ == '__main__':
+
     root = ttk.Window(title="弹窗演示", themename="superhero")
     root.withdraw()
     Messagebox(root, text="弹窗演示")
     Messagebox(root, progressbar=True)
+    # root.mainloop()
